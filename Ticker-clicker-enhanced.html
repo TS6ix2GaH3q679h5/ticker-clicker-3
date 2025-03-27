@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticker Clicker ENHANCED file</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 80px;
+      line-height: 1.8;
+      background: black;
+      color: white;
+      font-size: 20px;
+    }
+    .clickable {
+      cursor: pointer;
+      background-color: #333;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .clicked-first {
+      background-color: purple;
+    }
+    .clicked-second {
+      background-color: yellow;
+    }
+    #text-input {
+      width: 100%;
+      height: 200px;
+      font-size: 16px;
+      padding: 10px;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <textarea id="text-input" placeholder="Enter your text here..."></textarea>
+  <p>Click on any word to add a backtick before it. Click the same word again to remove the backtick.</p>
+    <p>Enhanced! Now highlights double instances with yellow.</p>
+  <p>Multiple paragraphs get scrunched together, so first put some placeholder (like @@) between the paragraphs.</p>
+  <p id="text"></p>
+
+  <script>
+    const textInput = document.getElementById('text-input');
+    const textElement = document.getElementById('text');
+    let words = [];
+    let clickedIndices = new Map(); // Tracks clicked indices
+    let wordCounts = new Map(); // Tracks occurrences of words
+
+    function normalizeWord(word) {
+      return word.replace(/^`/, '').replace(/[.,!?;:()"]/g, ''); // Remove leading backtick & punctuation
+    }
+
+    function toggleBacktick(index) {
+      let word = normalizeWord(words[index]); // Get the normalized word
+      let isClicked = clickedIndices.has(index);
+
+      if (isClicked) {
+        // Remove word from tracking
+        words[index] = words[index].replace(/^`/, '');
+        clickedIndices.delete(index);
+      } else {
+        // Add word and decide color
+        words[index] = '`' + words[index];
+        clickedIndices.set(index, word);
+      }
+
+      updateWordCounts();
+      renderWords();
+    }
+
+    function updateWordCounts() {
+      wordCounts.clear();
+      clickedIndices.forEach((word, index) => {
+        if (!wordCounts.has(word)) {
+          wordCounts.set(word, []);
+        }
+        wordCounts.get(word).push(index);
+      });
+    }
+
+    function renderWords() {
+      textElement.innerHTML = words
+        .map((word, i) => {
+          let baseClass = "clickable";
+          let normalizedWord = normalizeWord(word);
+
+          if (clickedIndices.has(i)) {
+            let occurrences = wordCounts.get(normalizedWord) || [];
+            let position = occurrences.indexOf(i);
+            baseClass += position === 0 ? " clicked-first" : " clicked-second";
+          }
+
+          return `<span class="${baseClass}">${word}</span>`;
+        })
+        .join(' ');
+    }
+
+    textElement.addEventListener('click', (event) => {
+      if (event.target.tagName.toLowerCase() === 'span') {
+        const index = Array.from(event.target.parentNode.children).indexOf(event.target);
+        toggleBacktick(index);
+      }
+    });
+
+    textInput.addEventListener('input', () => {
+      words = textInput.value.split(' ');
+      clickedIndices.clear();
+      wordCounts.clear();
+      renderWords();
+    });
+  </script>
+</body>
+</html>
