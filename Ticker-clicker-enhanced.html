@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<! – This is version 2 which includes the SELECT ALL TEXT button –>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -112,5 +113,22 @@
       renderWords();
     });
   </script>
+  
+<script>
+  function selectAllText() {
+  const range = document.createRange();
+  range.selectNode(document.body);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+// Example: Add a button to the page.
+const button = document.createElement('button');
+button.textContent = 'Select All Text';
+button.addEventListener('click', selectAllText);
+document.body.appendChild(button);
+
+</script>
 </body>
 </html>
